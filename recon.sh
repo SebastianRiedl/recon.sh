@@ -34,9 +34,44 @@ do
         D) DIRECTORY=${OPTARG};;
     esac
 done
-echo "Domain: $DOMAIN";
-echo "ScanType: $SCANTYPE";
-echo "Directory: $DIRECTORY";
+
+mkdir ${DIRECTORY}_recon
+
+nmap_scan()
+{
+	clear
+	# progress bar?
+	echo "Starting Nmap Scan..."
+	echo "Results will be stored at ${DIRECTORY}_recon/nmap"
+	nmap $DOMAIN > ${DIRECTORY}_recon/nmap
+}
+
+crt_scan()
+{
+	curl "https://crt.sh/?q=$DOMAIN&output=json" -o $DIRECTORY/crt
+}
+
+dirsearch_scan()
+{
+	./dirsearch.py -u $DOMAIN -e php --simple-report=$DIRECTORY/dirsearch
+}
+
+case $SCANTYPE in
+		nmap_only)
+			nmap_scan
+		;;
+		crt_only)
+			crt_scan
+		;;
+		dirsearch_only)
+			dirsearch_scan
+		;;
+		*)
+			nmap_scan
+			crt_scan
+			dirsearch_scan
+	esac 
+
 
 
 
